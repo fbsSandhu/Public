@@ -1,5 +1,8 @@
 #pragma once
 #include <mutex>
+#include <queue>
+#include <thread>
+#include <condition_variable>
 
 template <typename T>
 struct DataWrapper
@@ -12,81 +15,43 @@ template <typename T, typename Callback>
 class SPSC
 {
 public:
-    SPSC(Callback callback):process(callback)
+    SPSC(Callback callback):process(callback): process(callback), consumer_{[this]{Consume();}}
+    { }
+    void PushWork(const DataWrapper<T>& wrapper){
+        {
+            std::scoped_lock lock{mut};
+            queue_.push(wrapper);
+        }
+        cv.notify_one();
+    }
+    ~SPSC()
     {
-        consumer_thread = std::thread([this]{
-            while(running){
-                Consume();
-            }
-        });   
+        flag.store(true, std::memory_order_relaxed);
+        PushWork({}, true);
+        consumer_.join();
     }
 
-    void PushWork(const DataWrapper<T>& wrapper)
-    {
-        Node* new_node = new Node{wrapper, nullptr};
-        std::unique_lock<std::mutex> lock(mut);
-        if(!tail){
-            head = tail = new_node;
-        }
-        else if(tail !=nullptr){
-            tail -> next = new_node;
-            tail = new_node;
-        }
-    }
-    SPSC(const SPSC&) = delete;
-    SPSC(SPSC&&) = delete;
-    SPSC& operator =(const SPSC&) = delete;
-    SPSC& operator =(SPSC&&) = delete;
-
-    ~SPSC(){
-        running = false;
-        if(consumer_thread.joinable()){
-            consumer_thread.join();
-        }
-
-        std::unique_lock<std::mutex> lock(mut);
-        while(head){
-            Node* temp = head;
-            head = head -> next;
-            delete temp;
-        }
-        tail = nullptr;
-    } 
 
 private:
-
-    struct Node{
-        DataWrapper<T> data;
-        Node* next{nullptr};
-    };
-    Callback process;
-    std::atomic<bool> running{true};
-    std::mutex mut;
-
-    Node* head{nullptr};
-    Node* tail{nullptr};
-    std::thread consumer_thread;
-
-    void Consume()
-    {
-        Node* temp = nullptr;
-        {
-            std::lock_guard<std::mutex> lock(mut);
-            if(!head) return;
-
-            temp = head;
-            head = head ->next ;
-
-            if(!head){
-                tail = nullptr;
+    void consumer(){
+        while(!flag.load(std::memory_order_relaxed)){
+            std::unique_lock lock{mut};
+            if(queue_.empty()){
+                cv.wait(lock, [this]{return !queue_.empty();});
             }
+            if(flag.load(std::memory_order_relaxed)) break;
+            auto consumable = queue_.front();
+            queue_.pop();
+            lock.unlock();
+            process(consumable.data);
+            if(consumable.is_last_chunk) break;
         }
-        process(temp -> data.data);
-
-        if(temp -> data.is_last_chunk){
-            running = false;
-        }
-        delete temp;
 
     }
+    Callback process;
+    mutable std::mutex mut{};
+    std::queue<DataWrapper<T>> queue_{};
+    std::thread consumer_{};
+    std::condition_variable cv{};
+    std::atomic<bool> flag{false};
 };
