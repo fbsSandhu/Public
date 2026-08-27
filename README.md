@@ -15,11 +15,3 @@
 | **Thermodynamics Particle Simulator** | Python, NumPy, Matplotlib | Vectorized 2D hard-sphere elastic collision engine modeling Maxwell-Boltzmann distributions across $10^6+$ time steps. | [`/thermo-simulator`](./Collision_Sim) |
 
 ---
-
-## Repository Structure
-
-```text
-Public/
-└── Collision_Sim     # Vectorized 2D Statistical Mechanics Engine
-├── Implement/       # SSO String, Smart Pointers, SPSC Queue
-├── limit-order-book/     # C++20 Order Matching Engine & Benchmarks
