@@ -1,6 +1,6 @@
 # High-Performance Systems & Computational Physics Portfolio
 
-**Brandon Sandhu** | Imperial College London (BSc Physics)
+**Brandon Sandhu** | Imperial College London (MSci Physics)
 [GitHub](https://github.com/fbsSandhu) | [LinkedIn](https://www.linkedin.com/in/feteh-sandhu-748040359/)
 
 
