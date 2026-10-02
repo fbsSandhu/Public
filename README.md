@@ -1,17 +1,17 @@
 # High-Performance Systems & Computational Physics Portfolio
 
-**Brandon Sandhu** | Imperial College London (BSc Physics)
+**Feteh Sandhu** | Imperial College London (MSci Physics)
 [GitHub](https://github.com/fbsSandhu) | [LinkedIn](https://www.linkedin.com/in/feteh-sandhu-748040359/)
 
 
 ---
 
-## Project Overview
+# Portfolio
 
-| Project | Tech Stack | Highlights | Link |
-| :--- | :--- | :--- | :--- |
-| **Low-Latency $O(1)$ Limit Order Book** | C++20, Google Benchmark, Google Test | Zero-allocation matching engine on the hot path utilising intrusive doubly-linked lists and memory pooling. | [`/limit-order-book`](./limit-order-book) |
-| **C++ Systems & Memory Primitives** | C++20, Linux Systems | Custom SSO string layout (23-byte stack buffer), RAII smart pointers, and a thread-safe SPSC queue. | [`/cpp-primitives`](./Implement) |
-| **Thermodynamics Particle Simulator** | Python, NumPy, Matplotlib | Vectorized 2D hard-sphere elastic collision engine modeling Maxwell-Boltzmann distributions across $10^6+$ time steps. | [`/thermo-simulator`](./Collision_Sim) |
+## Projects
 
----
+| System | Focus | Core Architecture |
+| :--- | :--- | :--- |
+| **$O(1)$ Limit Order Book** | Low-Latency Matching Engine | 3-level hierarchical bitmap for $O(1)$ price discovery, cache-line aligned intrusive order lists, zero heap allocations on the hot path (~50ns match latency). |
+| **TCP Feed Handler & SPSC Pipeline** | Network Ingestion & Thread Handoff | Linux `epoll` reactor loop feeding a lock-free single-producer single-consumer ring buffer using bitmasked power-of-2 wrapping and atomic acquire/release semantics. |
+| **Thermodynamics Particle Simulator** | Scientific Computing & Statistical Mechanics | Vectorized 2D hard-sphere elastic collision engine modeling Maxwell-Boltzmann velocity distributions and ideal gas state equations across $10^6+$ steps. |
