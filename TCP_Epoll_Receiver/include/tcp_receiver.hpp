@@ -4,6 +4,7 @@
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <thread>
@@ -28,9 +29,36 @@ struct Package{
     Side side;
 };
 
+struct ClientBuffer{
+    std::vector<char> buf;
+    size_t read_idx{};
+    [[nodiscard]] size_t unread_bytes() const noexcept{
+        return buf.size() - read_idx;
+    }
+
+    void reset() noexcept {
+        buf.clear();
+        read_idx = 0;
+    }
+
+    void compact(){
+        if(read_idx > 0) {
+            size_t remaining = unread_bytes();
+            if(remaining > 0){
+                std::memmove(buf.data(), buf.data() + read_idx, remaining);
+                buf.resize(remaining);
+            }else{
+                buf.clear();
+            }
+            read_idx = 0;
+        }
+    }
+
+};
+
 class TCPReceiver{
     LFSPSCQ<Package, CAPACITY>* queue;
-    std::map<int, std::vector<char>> client_buffers;
+    std::vector<ClientBuffer> client_buffers;
 
     int32_t epoll_fd;
     int32_t listening_sock;
