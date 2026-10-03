@@ -183,11 +183,24 @@ void TCPReceiver::read_and_parse(int client_sock)
         pkg.order_id = be64toh(pkg.order_id);
         pkg.price = ntohl(pkg.price);
         pkg.quantity = ntohl(pkg.quantity);
+        
+        int retries{1000};
 
-        if(!queue -> try_push(pkg)) break;
-        cb.read_idx = sizeof(Package);
+        while(!queue -> try_push(pkg) && retries-- > 0){
+            #if defined(__x86_64__) || defined(_M_X64)
+            __builtin_ia32_pause();
+            #endif
+        }
+        
+        if(retries <= 0) {
+            break;
+        }
+
+        cb.read_idx += sizeof(Package);
 
     }
+
+    cb.compact();
 }
 
 void TCPReceiver::stop()

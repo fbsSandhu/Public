@@ -18,9 +18,9 @@ Stress-tested via automated payload generation over network loopback and physica
 
 | Metric | Latency |
 | :--- | :--- |
-| **Min** | `67.6 µs` |
-| **Avg** | `197.6 µs` |
-| **Max (p99+ tail)** | `743.0 µs` |
+| **Min** | `41.6 µs` |
+| **Avg** | `133.6 µs` |
+| **Max (p99+ tail)** | `601.8 µs` |
 
 ## Build & Test Automation
 

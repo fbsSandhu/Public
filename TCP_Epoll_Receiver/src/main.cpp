@@ -32,7 +32,7 @@ int main() {
             Package pck;
             if(lfqueue.try_pop(pck)){
                 uint64_t now = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-
+                
                 if(sample_count < MAX_SAMPLES){
                     latencies[sample_count].send_time_ns = pck.timestamp_ns;
                     latencies[sample_count].receive_time_ns = now;
@@ -43,6 +43,7 @@ int main() {
     });
 
     while(!producer_done.load(std::memory_order_acquire));
+
 
 
     consumer_running.store(false, std::memory_order_release); 
